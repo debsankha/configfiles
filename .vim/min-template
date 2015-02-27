@@ -1,0 +1,9 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath,amssymb,amsthm,graphicx}
+\title{}
+\author{Debsankha Manik}
+
+\begin{document}
+\maketitle
+
+\end{document}

@@ -1,5 +1,4 @@
 --
--- xmonad example config file for xmonad-0.9
 --
 -- A template showing all available configuration hooks,
 -- and how to override the defaults in your own xmonad.hs conf file.
@@ -24,16 +23,26 @@ import XMonad.Layout.IndependentScreens
 import qualified Data.Map        as M
 import XMonad.Hooks.DynamicLog (xmobar)
 
+--prompt stuff
+import XMonad.Prompt
+
+
 -- Xmobar stuff--
 import XMonad.Hooks.ManageDocks
 import XMonad.Util.Run(spawnPipe)
 import XMonad.Util.Run(runInTerm)
+import XMonad.Util.EZConfig
 import XMonad.Util.EZConfig(additionalKeys)
 import Graphics.X11.ExtraTypes.XF86
 import System.IO
 import XMonad.Util.WorkspaceCompare
 -- end xmobar stuff--
+
+
+-- Dynamic workspace grouping
+import XMonad.Actions.DynamicWorkspaceGroups
  
+  
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
@@ -131,9 +140,39 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
         | (key, sc) <- zip  [xK_w, xK_e, xK_r] [0..] 
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
  
+
+   -- Workspace grouping
+   ++
+   [((modm .|. shiftMask, xK_n     ), promptWSGroupAdd myXPConfig "Name this group: ")
+   ,((modm .|. shiftMask, xK_g     ), promptWSGroupView myXPConfig "Go to group: ")
+   ,((modm .|. shiftMask, xK_d     ), promptWSGroupForget myXPConfig "Forget group: ")]
  
 -- Run xmonad with the settings you specify. No need to modify this.
 --
+--
+
+-- Some weird stuff foe dynamicworkspacegrouping
+--
+myNormalBorderColor  = "#444488"
+myFocusedBorderColor = "#ee9999"
+myBgColor= "#001070"
+myFgColor = "#bbbbdd"
+myBgHLight= "#4444aa"
+myFgHLight= "#ddddff"
+
+myXPConfig :: XPConfig
+myXPConfig = defaultXPConfig
+              { font        = "xft:Terminus:pixelsize=16"
+	      , bgColor     = myBgColor
+	      , fgColor     = myFgColor
+	      , bgHLight    = myBgHLight
+	      , fgHLight    = myFgHLight
+              , borderColor = myNormalBorderColor
+              }
+
+
+
+
 myManagementHooks :: [ManageHook]
 myManagementHooks = [
   resource =? "stalonetray" --> doIgnore

@@ -1,60 +1,52 @@
---
---
--- A template showing all available configuration hooks,
--- and how to override the defaults in your own xmonad.hs conf file.
---
--- Normally, you'd only override those defaults you care about.
---
--- NOTE: Those updating from earlier xmonad versions, who use
--- EwmhDesktops, safeSpawn, WindowGo, or the simple-status-bar
--- setup functions (dzen, xmobar) probably need to change
--- xmonad.hs, please see the notes below, or the following
--- link for more details:
---
--- http://www.haskell.org/haskellwiki/Xmonad/Notable_changes_since_0.8
---
- 
 import XMonad
-import Data.Monoid
-import System.Exit
-import XMonad.Hooks.DynamicLog 
-import qualified XMonad.StackSet as W
+import XMonad.Config.Gnome
+import XMonad.Hooks.DynamicLog
 import XMonad.Layout.IndependentScreens
 import qualified Data.Map        as M
-import XMonad.Hooks.DynamicLog (xmobar)
+import qualified XMonad.StackSet as W
+import System.Exit
 
---prompt stuff
-import XMonad.Prompt
-
-
--- Xmobar stuff--
-import XMonad.Hooks.ManageDocks
-import XMonad.Util.Run(spawnPipe)
-import XMonad.Util.Run(runInTerm)
-import XMonad.Util.EZConfig
-import XMonad.Util.EZConfig(additionalKeys)
-import Graphics.X11.ExtraTypes.XF86
+import XMonad.Operations
 import System.IO
-import XMonad.Util.WorkspaceCompare
--- end xmobar stuff--
+import XMonad.Util.Run
+import XMonad.Actions.CycleWS
+import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.SetWMName
+import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.UrgencyHook
+import XMonad.Hooks.FadeInactive
+import XMonad.Hooks.EwmhDesktops
+
+import XMonad.Layout.NoBorders (smartBorders, noBorders)
+import XMonad.Layout.PerWorkspace (onWorkspace, onWorkspaces)
+import XMonad.Layout.Reflect (reflectHoriz)
+import XMonad.Layout.IM
+import XMonad.Layout.SimpleFloat
+import XMonad.Layout.Spacing
+import XMonad.Layout.ResizableTile
+import XMonad.Layout.LayoutHints
+import XMonad.Layout.LayoutModifier
+import XMonad.Layout.Grid
+
+import Data.Ratio ((%))
+
+-- stuff for multimedia keys
+import Graphics.X11.ExtraTypes.XF86
 
 
--- Dynamic workspace grouping
-import XMonad.Actions.DynamicWorkspaceGroups
- 
-  
--- The preferred terminal program, which is used in a binding below and by
--- certain contrib modules.
---
-myWorkspaces    =  withScreens 3 ["1","2","3","4","5","6","7","8","9"]
+--import qualified Codec.Binary.UTF8.String as UTF8
+
+myWorkspaces    =  withScreens 2 ["1","2","3","4","5","6","7","8","9"]
+myBitmapsDir = "/home/dmanik/.xmonad/dzen2"
 
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  
     -- launch a terminal
-    [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
+    [ ((modm .|. shiftMask, xK_Return), spawn "mate-terminal")
  
     -- launch dmenu
-    , ((modm,               xK_p     ), spawn "exe=`dmenu_run | dmenu` && eval \"exec $exe\"")
+    , ((modm,               xK_p     ), spawn "exe=`dmenu_path | dmenu_run` && eval \"exec $exe\"")
  
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
@@ -113,7 +105,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     --
     -- , ((modm              , xK_b     ), sendMessage ToggleStruts)
  
-    -- Quit xmonad
+    -- Qud.stackset
+    -- it xmonad
     , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
  
     -- Restart xmonad
@@ -131,76 +124,71 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
          | (i, k) <- zip (workspaces' conf) [xK_1 .. xK_9]
          , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
     ++
- 
+    -- Volume control pulseaudio
+    [((0, xF86XK_AudioLowerVolume   ), spawn "sinknum=$(pactl list short sinks | grep RUNNING | awk '{print $1}') && pactl set-sink-volume $sinknum -- -1.5%")
+    , ((0, xF86XK_AudioRaiseVolume   ), spawn "sinknum=$(pactl list short sinks | grep RUNNING | awk '{print $1}') && pactl set-sink-volume $sinknum +1.5%")
+    , ((0, xF86XK_AudioMute          ), spawn "sinknum=$(pactl list short sinks | grep RUNNING | awk '{print $1}') && pactl set-sink-mute $sinknum toggle")]
+
+    ++
     --
     -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
     --
     [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
-        | (key, sc) <- zip  [xK_w, xK_e, xK_r] [0..] 
+        | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+
+
+--dzen stuff
+myLogHook :: Handle -> X ()
+myLogHook h = dynamicLogWithPP $ defaultPP
+    {
+        ppCurrent           =   dzenColor "#ebac54" "#1B1D1E" . pad
+      , ppVisible           =   dzenColor "white" "#1B1D1E" . pad
+      , ppHidden            =   dzenColor "white" "#1B1D1E" . pad
+      , ppUrgent            =   dzenColor "#ff0000" "#1B1D1E" . pad
+      , ppWsSep             =   " "
+      , ppSep               =   "  |  "
+      , ppLayout            =   dzenColor "#ebac54" "#1B1D1E" .
+                                (\x -> case x of
+                                    "ResizableTall"             ->      "^i(" ++ myBitmapsDir ++ "/tall.xbm)"
+                                    "Mirror ResizableTall"      ->      "^i(" ++ myBitmapsDir ++ "/mtall.xbm)"
+                                    "Full"                      ->      "^i(" ++ myBitmapsDir ++ "/full.xbm)"
+                                    "Simple Float"              ->      "~"
+                                    _                           ->      x
+                                )
+      , ppTitle             =   (" " ++) . dzenColor "white" "#1B1D1E" . dzenEscape
+      , ppOutput            =   hPutStrLn h
+    }
+
+myXmonadBar = "dzen2 -x '0' -y '0' -h '24' -w '1920' -ta 'l' -fg '#FFFFFF' -bg '#1B1D1E'"
+
+myStatusBar = "conky -c ~/.xmonad/.conky_dzen | dzen2 -x '1921' -w '1024' -h '24' -ta 'r' -bg '#1B1D1E' -fg '#FFFFFF' -y '0'"
  
-
-   -- Workspace grouping
-   ++
-   [((modm .|. shiftMask, xK_n     ), promptWSGroupAdd myXPConfig "Name this group: ")
-   ,((modm .|. shiftMask, xK_g     ), promptWSGroupView myXPConfig "Go to group: ")
-   ,((modm .|. shiftMask, xK_d     ), promptWSGroupForget myXPConfig "Forget group: ")]
- 
--- Run xmonad with the settings you specify. No need to modify this.
---
---
-
--- Some weird stuff foe dynamicworkspacegrouping
---
-myNormalBorderColor  = "#444488"
-myFocusedBorderColor = "#ee9999"
-myBgColor= "#001070"
-myFgColor = "#bbbbdd"
-myBgHLight= "#4444aa"
-myFgHLight= "#ddddff"
-
-myXPConfig :: XPConfig
-myXPConfig = defaultXPConfig
-              { font        = "xft:Terminus:pixelsize=16"
-	      , bgColor     = myBgColor
-	      , fgColor     = myFgColor
-	      , bgHLight    = myBgHLight
-	      , fgHLight    = myFgHLight
-              , borderColor = myNormalBorderColor
-              }
-
-
-
-
-myManagementHooks :: [ManageHook]
-myManagementHooks = [
-  resource =? "stalonetray" --> doIgnore
-  ]
-
+main :: IO ()
 main = do
-	xmproc <- spawnPipe "~/.cabal/bin/xmobar ~/.xmobarrc"
-	xmonad $ defaultConfig
---	xmonad =<< xmobar defaultConfig
-		{ workspaces = myWorkspaces,
-		  keys = myKeys,
-		  manageHook = manageDocks <+> manageHook defaultConfig <+> composeAll myManagementHooks,
-		  layoutHook = avoidStruts $ layoutHook defaultConfig,
-		  logHook = dynamicLogWithPP xmobarPP
-                        { ppOutput = hPutStrLn xmproc
-                        , ppTitle = xmobarColor "green" "" . shorten 50
-			,ppSort = getSortByXineramaRule
-                        }
-		}
+    startApps <- spawn "sh ~/.xmonad/scripts/startup.sh"
+    composekey_set <- spawn "/usr/bin/xmodmap  ~/.xmonad/scripts/.xmodmap"
+    dzenLeftBar <- spawnPipe myXmonadBar
+    dzenRightBar <- spawnPipe myStatusBar
+    xmonad $ gnomeConfig
+         { workspaces = myWorkspaces,
+           keys = myKeys,
+	   logHook = myLogHook dzenLeftBar >> fadeInactiveLogHook 0xdddddddd
+         }
 
---myBaseConfig = gnomeConfig
+  
+pangoColor :: String -> String -> String
+pangoColor fg = wrap left right
+  where
+    left  = "<span foreground=\"" ++ fg ++ "\">"
+    right = "</span>"
 
-
- 
--- A structure containing your configuration settings, overriding
--- fields in the default config. Any you don't override, will
--- use the defaults defined in xmonad/XMonad/Config.hs
---
--- No need to modify this.
---
-
+pangoSanitize :: String -> String
+pangoSanitize = foldr sanitize ""
+  where
+    sanitize '>'  xs = "&gt;" ++ xs
+    sanitize '<'  xs = "&lt;" ++ xs
+    sanitize '\"' xs = "&quot;" ++ xs
+    sanitize '&'  xs = "&amp;" ++ xs
+    sanitize x    xs = x:xs

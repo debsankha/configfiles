@@ -35,9 +35,15 @@ import Data.Ratio ((%))
 import Graphics.X11.ExtraTypes.XF86
 
 
+
+-- Dynamic workspace grouping
+import XMonad.Actions.DynamicWorkspaceGroups
+import XMonad.Prompt
+
+
 --import qualified Codec.Binary.UTF8.String as UTF8
 
-myWorkspaces    =  withScreens 2 ["1","2","3","4","5","6","7","8","9"]
+myWorkspaces    =  withScreens 3 ["1","2","3","4","5","6","7","8","9"]
 myBitmapsDir = "/home/dmanik/.xmonad/dzen2"
 
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
@@ -123,11 +129,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [((m .|. modm, k), windows $ onCurrentScreen f i)
          | (i, k) <- zip (workspaces' conf) [xK_1 .. xK_9]
          , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
-    ++
-    -- Volume control pulseaudio
-    [((0, xF86XK_AudioLowerVolume   ), spawn "sinknum=$(pactl list short sinks | grep RUNNING | awk '{print $1}') && pactl set-sink-volume $sinknum -- -1.5%")
-    , ((0, xF86XK_AudioRaiseVolume   ), spawn "sinknum=$(pactl list short sinks | grep RUNNING | awk '{print $1}') && pactl set-sink-volume $sinknum +1.5%")
-    , ((0, xF86XK_AudioMute          ), spawn "sinknum=$(pactl list short sinks | grep RUNNING | awk '{print $1}') && pactl set-sink-mute $sinknum toggle")]
 
     ++
     --
@@ -137,6 +138,34 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
         | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+   -- Workspace grouping
+   ++
+   [((modm .|. shiftMask, xK_n     ), promptWSGroupAdd myXPConfig "Name this group: ")
+   ,((modm .|. shiftMask, xK_g     ), promptWSGroupView myXPConfig "Go to group: ")
+   ,((modm .|. shiftMask, xK_d     ), promptWSGroupForget myXPConfig "Forget group: ")]
+ 
+-- Run xmonad with the settings you specify. No need to modify this.
+--
+--
+
+-- Some weird stuff foe dynamicworkspacegrouping
+--
+myNormalBorderColor  = "#444488"
+myFocusedBorderColor = "#ee9999"
+myBgColor= "#007A7A"
+myFgColor = "#bbbbdd"
+myBgHLight= "#99CACA"
+myFgHLight= "#EBF4F4"
+
+myXPConfig :: XPConfig
+myXPConfig = defaultXPConfig
+              { font        = "xft:Terminus:pixelsize=16"
+	      , bgColor     = myBgColor
+	      , fgColor     = myFgColor
+	      , bgHLight    = myBgHLight
+	      , fgHLight    = myFgHLight
+              , borderColor = myNormalBorderColor
+              }
 
 
 --dzen stuff
@@ -161,9 +190,9 @@ myLogHook h = dynamicLogWithPP $ defaultPP
       , ppOutput            =   hPutStrLn h
     }
 
-myXmonadBar = "dzen2 -x '0' -y '0' -h '24' -w '1920' -ta 'l' -fg '#FFFFFF' -bg '#1B1D1E'"
+myXmonadBar = "dzen2 -x '1281' -y '0' -h '24' -w '1920' -ta 'l' -fg '#FFFFFF' -bg '#1B1D1E'"
 
-myStatusBar = "conky -c ~/.xmonad/.conky_dzen | dzen2 -x '1921' -w '1024' -h '24' -ta 'r' -bg '#1B1D1E' -fg '#FFFFFF' -y '0'"
+myStatusBar = "conky -c ~/.xmonad/.conky_dzen | dzen2 -x '3201' -w '1024' -h '24' -ta 'r' -bg '#1B1D1E' -fg '#FFFFFF' -y '0'"
  
 main :: IO ()
 main = do

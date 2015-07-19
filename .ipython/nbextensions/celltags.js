@@ -1,0 +1,1 @@
+/home/dmanik/ipython_extensions/nbextensions/celltags.js

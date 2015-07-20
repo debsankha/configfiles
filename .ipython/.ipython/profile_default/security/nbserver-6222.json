@@ -1,0 +1,8 @@
+{
+  "secure": false, 
+  "url": "http://localhost:8888/", 
+  "hostname": "localhost", 
+  "base_url": "/", 
+  "notebook_dir": "/home/dmanik/Python-Course/02-oo-programming/talk", 
+  "port": 8888
+}

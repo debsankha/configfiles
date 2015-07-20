@@ -1,0 +1,9 @@
+{
+  "url": "http://localhost:8889/",
+  "pid": 1749,
+  "notebook_dir": "/home/dmanik/projects/mpi/multistability/notebooks",
+  "port": 8889,
+  "base_url": "/",
+  "hostname": "localhost",
+  "secure": false
+}

@@ -19,7 +19,7 @@ c = get_config()
 
 # Configure matplotlib for interactive use with the default matplotlib backend.
 c.IPKernelApp.matplotlib = 'inline'
-c.InlineBackend.rc = {'figure.figsize': (15.0, 10.0),\
+c.InlineBackend.rc = {'figure.figsize': (12.0, 8.0),\
      'figure.facecolor': 'white',\
 	 'savefig.dpi': 300,\
      'figure.subplot.bottom': 0.125,\
@@ -32,7 +32,7 @@ c.InlineBackend.rc = {'figure.figsize': (15.0, 10.0),\
 	 'legend.fancybox': True, \
      'legend.framealpha': 0.3,\
 	 'lines.linewidth': 3}
-
+c.InlineBackend.figure_formats = ['svg']
 
 # 
 # c.IPKernelApp.transport = 'tcp'

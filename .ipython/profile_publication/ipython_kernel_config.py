@@ -30,7 +30,7 @@ c.InlineBackend.rc = {'figure.figsize': (12.0, 8.0),\
 	 'ytick.major.size': 10,\
      'ytick.minor.size': 5,\
 	 'legend.fancybox': True, \
-     'legend.framealpha': 0.3,\
+     'legend.framealpha': 0.1,\
 	 'lines.linewidth': 3}
 c.InlineBackend.figure_formats = ['svg']
 

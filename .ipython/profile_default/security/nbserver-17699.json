@@ -1,0 +1,8 @@
+{
+  "base_url": "/",
+  "port": 8890,
+  "url": "http://localhost:8890/",
+  "hostname": "localhost",
+  "notebook_dir": "/home/dmanik",
+  "secure": false
+}

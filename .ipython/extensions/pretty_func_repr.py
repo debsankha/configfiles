@@ -1,1 +1,0 @@
-/home/dmanik/ipython_extensions/extensions/pretty_func_repr.py

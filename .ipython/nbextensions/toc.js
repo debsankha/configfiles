@@ -1,1 +1,0 @@
-/home/dmanik/ipython_extensions/nbextensions/toc.js

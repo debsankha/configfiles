@@ -1,1 +1,0 @@
-/home/dmanik/ipython_extensions/extensions/inactive.py

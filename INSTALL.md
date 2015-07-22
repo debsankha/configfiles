@@ -7,4 +7,5 @@ A Step-by-step list of things to do to replicate the environment in other comput
 2.  crete virtualenv
         - virtualenv -p python3.4 ~/venvs/networks 
         - pip install -r ~/configfiles/requirements.txt
-
+3.  Install the gnome terminal theme:
+        - source ~/configfiles/.config/base16-solarized.dark.sh

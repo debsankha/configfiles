@@ -49,7 +49,7 @@ myBitmapsDir = "/home/dmanik/.xmonad/dzen2"
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  
     -- launch a terminal
-    [ ((modm .|. shiftMask, xK_Return), spawn "mate-terminal")
+    [ ((modm .|. shiftMask, xK_Return), spawn "gnome-terminal")
  
     -- launch dmenu
     , ((modm,               xK_p     ), spawn "exe=`dmenu_path | dmenu_run` && eval \"exec $exe\"")

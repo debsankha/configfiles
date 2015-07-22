@@ -1,7 +1,10 @@
-Here I list the programs I had to install that could not be packaged in the repository
-======================================================================================
+A Step-by-step list of things to do to replicate the environment in other computers
+===================================================================================
 
-1.  flake8 (for vim plugin autopep8)
-2.  pip install jedi
-3.  gnome-terminal
-        -use base16-gnome-terminal
+## Install packages via package manager
+
+1.  sudo apt-get install python3-virtualenv flake8 gfortran libatlas-base-dev gnome-terminal
+2.  crete virtualenv
+        - virtualenv -p python3.4 ~/venvs/networks 
+        - pip install -r ~/configfiles/requirements.txt
+

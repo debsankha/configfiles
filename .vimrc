@@ -8,5 +8,5 @@ set smartindent
 "filetype plugin indent on
 :set expandtab
 :set background=dark
-:colorscheme base16-solarized
+:colorscheme solarized
 :set tabstop=4
